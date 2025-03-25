@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Bug Bingo Deluxe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --success: #28a745;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Premium Header */
+        .game-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 2rem 0;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shine 8s infinite linear;
+        }
+        
+        .game-title {
+            font-size: 3rem;
+            font-weight: 800;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            position: relative;
+        }
+        
+        /* BINGO Letters with Cross Mark Animation */
+        .bingo-track {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            position: relative;
+        }
+        
+        .bingo-letter {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+        }
+        
+        .bingo-letter::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+            z-index: 1;
+        }
+        
+        .bingo-letter.completed {
+            animation: letterPop 0.6s ease-out;
+        }
+        
+        .bingo-letter.completed::after {
+            content: "✓";
+            position: absolute;
+            font-size: 3.5rem;
+            color: rgba(255,255,255,0.9);
+            animation: checkMark 0.8s ease-out;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+        
+        /* Grid with 3D Effect */
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            perspective: 1000px;
+        }
+        
+        .bug-cell {
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        
+        .bug-cell::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+            z-index: 1;
+        }
+        
+        .bug-cell:hover {
+            transform: translateY(-5px) rotateX(5deg);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .bug-cell.correct {
+            background: linear-gradient(145deg, #d4edda, #b1dfbb);
+            color: #155724;
+            transform: scale(0.95);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .bug-cell.correct::after {
+            content: "✓";
+            position: absolute;
+            font-size: 3rem;
+            color: rgba(25, 135, 84, 0.2);
+        }
+        
+        /* Premium Modal */
+        .code-modal .modal-content {
+            border-radius: 15px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            transform-style: preserve-3d;
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+        }
+        
+        .code-modal .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .code-modal .modal-header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shine 8s infinite linear;
+        }
+        
+        #buggedCode {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #444;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        
+        /* Win Celebration */
+        .win-celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        
+        .win-celebration.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .win-text {
+            font-size: 6rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 0 20px rgba(255,255,255,0.8);
+            margin-bottom: 2rem;
+            transform: scale(0);
+            animation: textPop 1s 0.5s forwards;
+        }
+        
+        .win-subtext {
+            font-size: 2rem;
+            color: white;
+            opacity: 0;
+            animation: fadeIn 1s 1.5s forwards;
+        }
+        
+        /* Animations */
+        @keyframes shine {
+            0% { transform: rotate(0deg) translate(-30%, -30%); }
+            100% { transform: rotate(360deg) translate(-30%, -30%); }
+        }
+        
+        @keyframes letterPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes checkMark {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes textPop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .bingo-letter {
+                width: 50px;
+                height: 50px;
+                font-size: 1.8rem;
+            }
+            
+            .bug-cell {
+                padding: 1rem;
+                font-size: 1.5rem;
+            }
+            
+            .win-text {
+                font-size: 3rem;
+            }
+            
+            .win-subtext {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- Premium Header with BINGO Letters -->
+        <div class="game-header text-center">
+            <h1 class="game-title">PYTHON BUG BINGO</h1>
+            <div class="bingo-track" id="bingoProgress">
+                <div class="bingo-letter" style="background-color: #FF6B6B;">B</div>
+                <div class="bingo-letter" style="background-color: #4ECDC4;">I</div>
+                <div class="bingo-letter" style="background-color: #45B7D1;">N</div>
+                <div class="bingo-letter" style="background-color: #A5D8FF;">G</div>
+                <div class="bingo-letter" style="background-color: #FFD8A8;">O</div>
+            </div>
+        </div>
+        
+        <!-- Enhanced Bingo Grid -->
+        <div id="grid"></div>
+        
+        <div class="text-center">
+            <button id="resetBtn" class="btn btn-danger btn-lg px-4 py-2">
+                <i class="bi bi-arrow-repeat"></i> Reset Game
+            </button>
+        </div>
+    </div>
+
+    <!-- Premium Code Modal -->
+    <div class="modal fade code-modal" id="buggedCodeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">FIX THE BUG</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="fw-bold mb-2">Bugged Code:</h6>
+                    <pre id="buggedCode"></pre>
+                    
+                    <div class="test-case-info bg-light p-3 rounded mb-3">
+                        <div id="testCase" class="fw-bold"></div>
+                        <div id="expectedOutput" class="mt-2"></div>
+                    </div>
+                    
+                    <h6 class="fw-bold mb-2">Your Solution:</h6>
+                    <textarea id="userCode" class="form-control mb-3" 
+                              placeholder="Enter your corrected code here..." 
+                              rows="8" spellcheck="false"></textarea>
+                    
+                    <div id="testCasesResult"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="submitBtn" type="button" class="btn btn-primary">Submit Fix</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Celebration Modal -->
+    <div class="win-celebration" id="winCelebration">
+        <div class="win-text">CONGRATULATIONS!</div>
+        <div class="win-subtext">You've fixed all the bugs and won Python Bug Bingo!</div>
+    </div>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Confetti JS -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        // Bug data array (same as before)
+       
+        const bug_data_python = {
+            "bug_1": {
+                "code": "def fibonacci(n):\n    if n == 0:\n        return 1\n    if n == 1:\n        return 1\n    return fibonacci(n - 1) + fibonacci(n - 2)",
+                "test_case": "fibonacci(5)",
+                "expected_output": "5"
+            },
+            "bug_2": {
+                "code": "def factorial(n):\n    return n * factorial(n - 1)",
+                "test_case": "factorial(5)",
+                "expected_output": "120"
+            },
+            "bug_3": {
+                "code": "def merge_sort(arr):\n    if len(arr) < 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    return merge(left, right)",
+                "test_case": "merge_sort([4, 3, 2, 1])",
+                "expected_output": "[1, 2, 3, 4]"
+            },
+            "bug_4": {
+                "code": "def binary_search(arr, target):\n    mid = len(arr) // 2\n    if arr[mid] == target:\n        return mid\n    elif arr[mid] > target:\n        return binary_search(arr[:mid], target)\n    else:\n        return binary_search(arr[mid:], target)",
+                "test_case": "binary_search([1, 3, 5, 7, 9], 5)",
+                "expected_output": "2"
+            },
+            "bug_5": {
+                "code": "def is_palindrome(s):\n    return s.lower() == s[::-1]",
+                "test_case": "is_palindrome('Madam'), is_palindrome('hello')",
+                "expected_output": "True, False"
+            },
+            "bug_6": {
+                "code": "def quicksort(arr):\n    if len(arr) < 1:\n        return arr\n    pivot = arr[0]\n    left = [x for x in arr if x < pivot]\n    right = [x for x in arr if x >= pivot]\n    return quicksort(left) + [pivot] + quicksort(right)",
+                "test_case": "quicksort([3, 6, 8, 10, 1, 2, 1])",
+                "expected_output": "[1, 1, 2, 3, 6, 8, 10]"
+            },
+            "bug_7": {
+                "code": "def gcd(a, b):\n    while b:\n        a = b\n        b = a % b\n    return abs(a)",
+                "test_case": "gcd(-8, 12)",
+                "expected_output": "4"
+            },
+            "bug_8": {
+                "code": "def bubble_sort(arr):\n    for i in range(len(arr)):\n        for j in range(len(arr) - i - 1):\n            if arr[j] > arr[j + 1]:\n                arr[j], arr[j + 1] = arr[j + 1], arr[j]\n    return arr",
+                "test_case": "bubble_sort([5, 3, 8, 1, 2])",
+                "expected_output": "[1, 2, 3, 5, 8]"
+            },
+            "bug_9": {
+                "code": "def reverse_string(s):\n    return s[::-2]",
+                "test_case": "reverse_string(\"hello\")",
+                "expected_output": "'olleh'"
+            },
+            "bug_10": {
+                "code": "def sum_list(lst):\n    total = 0\n    for i in range(len(lst) + 1):\n        total += lst[i]\n    return total",
+                "test_case": "sum_list([1, 2, 3, 4])",
+                "expected_output": "10"
+            },
+            "bug_11": {
+                "code": "def count_vowels(s):\n    count = 0\n    for char in s:\n        if char in 'aeiou':\n            count += 1\n    return count",
+                "test_case": "count_vowels('Hello World')",
+                "expected_output": "3"
+            },
+            "bug_12": {
+                "code": "def power(x, n):\n    if n == 0:\n        return 1\n    elif n < 0:\n        return 1 / power(x, -n)\n    return x * power(x, n - 1)",
+                "test_case": "power(2, 3)",
+                "expected_output": "8"
+            },
+            "bug_13": {
+                "code": "def remove_duplicates(lst):\n    seen = []\n    return [x for x in lst if not (x in seen or seen.append(x))]",
+                "test_case": "remove_duplicates([1, 3, 3, 5, 5])",
+                "expected_output": "[1, 3, 5]"
+            },
+            "bug_14": {
+                "code": "def multiply_list(lst):\n    result = 1\n    for num in lst:\n        result *= num\n    return result if result != 0 else 1",
+                "test_case": "multiply_list([2, 3, 4])",
+                "expected_output": "24"
+            },
+            "bug_15": {
+                "code": "def find_max(lst):\n    max_num = lst[0]\n    for num in lst:\n        if num >= max_num:\n            max_num = num\n    return max_num",
+                "test_case": "find_max([1, 5, 3, 9, 2])",
+                "expected_output": "9"
+            },
+            "bug_16": {
+                "code": "def count_words(s):\n    words = s.split()\n    return len(words) + 1",
+                "test_case": "count_words(\"Hello world! This is a test.\")",
+                "expected_output": "6"
+            },
+            "bug_17": {
+                "code": "def anagram_check(s1, s2):\n    return sorted(s1.lower()) == sorted(s2)",
+                "test_case": "anagram_check(\"Listen\", \"Silent\")",
+                "expected_output": "True"
+            },
+            "bug_18": {
+                "code": "def find_min(lst):\n    min_num = lst[0]\n    for num in lst:\n        if num > min_num:\n            min_num = num\n    return min_num",
+                "test_case": "find_min([4, 2, 9, 1])",
+                "expected_output": "1"
+            },
+            "bug_19": {
+                "code": "def is_leap_year(year):\n    if (year % 4 == 0 and year % 100 != 0) or year % 400 == 0:\n        return False\n    return True",
+                "test_case": "is_leap_year(2000), is_leap_year(1900)",
+                "expected_output": "True, False"
+            },
+            "bug_20": {
+                "code": "def square_elements(lst):\n    return [x*x for x in lst if x >= 0]",
+                "test_case": "square_elements([1, 2, 3, 4, -1, -2])",
+                "expected_output": "[1, 4, 9, 16]"
+            },
+            "bug_21": {
+                "code": "def count_occurrences(lst, target):\n    count = 0\n    for num in lst:\n        if num = target:\n            count += 1\n    return count",
+                "test_case": "count_occurrences([1, 2, 2, 3, 4, 2], 2)",
+                "expected_output": "3"
+            },
+            "bug_22": {
+                "code": "def reverse_list(lst):\n    return lst.sort()",
+                "test_case": "reverse_list([5, 3, 8, 1, 2])",
+                "expected_output": "[8, 5, 3, 2, 1]"
+            },
+            "bug_23": {
+                "code": "def word_count(sentence):\n    words = sentence.split()\n    return {word: words.count(word) for word in set(words)}",
+                "test_case": "word_count(\"apple banana apple orange apple banana\")",
+                "expected_output": "{'apple': 3, 'banana': 2, 'orange': 1}"
+            },
+            "bug_24": {
+                "code": "def capitalize_names(names):\n    return [name.capitalize for name in names]",
+                "test_case": "capitalize_names(['alice', 'bob', 'charlie'])",
+                "expected_output": "['Alice', 'Bob', 'Charlie']"
+            },
+            "bug_25": {
+                "code": "def get_even_numbers(lst):\n    return filter(lambda x: x % 2 == 0, lst)",
+                "test_case": "get_even_numbers([1, 2, 3, 4, 5, 6])",
+                "expected_output": "[2, 4, 6]"
+            }
+        };
+
+
+        // Game state
+        const bugDataArray = Object.values(bug_data_python).slice(0, 25);
+        let bingoState = {
+            rows: new Array(5).fill(0),
+            cols: new Array(5).fill(0),
+            diagonal1: 0,
+            diagonal2: 0
+        };
+        let completedCells = new Array(5).fill().map(() => new Array(5).fill(false));
+        let completedLetters = 0;
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            createGrid();
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+        });
+
+        function createGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'bug-cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.innerHTML = '🐛';
+                    
+                    cell.addEventListener('click', () => {
+                        if (!completedCells[i][j]) {
+                            openModal(i, j);
+                        }
+                    });
+                    
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function openModal(row, col) {
+            const index = row * 5 + col;
+            const bugData = bugDataArray[index];
+            
+            if (!bugData) {
+                console.error('No bug data found for index:', index);
+                return;
+            }
+            
+            // Set modal content
+            document.getElementById('buggedCode').textContent = bugData.code;
+            document.getElementById('testCase').textContent = `Test Case: ${bugData.test_case}`;
+            document.getElementById('expectedOutput').textContent = `Expected Output: ${bugData.expected_output}`;
+            document.getElementById('userCode').value = '';
+            document.getElementById('testCasesResult').innerHTML = '';
+            
+            // Set submit action
+            document.getElementById('submitBtn').onclick = () => submitSolution(row, col, bugData);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('buggedCodeModal'));
+            modal.show();
+        }
+
+        function submitSolution(row, col, bugData) {
+            const userCode = document.getElementById('userCode').value.trim();
+            const isCorrect = userCode.length > 0 && userCode !== bugData.code;
+            
+            if (isCorrect) {
+                // Mark cell as correct
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                cell.classList.add('correct');
+                completedCells[row][col] = true;
+                
+                // Trigger cell completion effect
+                triggerCellCelebration(cell);
+                
+                // Update Bingo state
+                bingoState.rows[row]++;
+                bingoState.cols[col]++;
+                if (row === col) bingoState.diagonal1++;
+                if (row + col === 4) bingoState.diagonal2++;
+                
+                // Check for completed lines
+                checkBingo();
+            }
+            
+            // Show result message
+            const resultElement = document.getElementById('testCasesResult');
+            if (isCorrect) {
+                resultElement.innerHTML = `
+                    <div class="alert alert-success d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        Correct! Well done!
+                    </div>
+                `;
+                
+                // Close modal after delay
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('buggedCodeModal'));
+                    modal.hide();
+                }, 1500);
+            } else {
+                resultElement.innerHTML = `
+                    <div class="alert alert-danger d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Incorrect, try again!
+                    </div>
+                `;
+            }
+        }
+
+        function triggerCellCelebration(cell) {
+            // Create confetti for cell completion
+            const rect = cell.getBoundingClientRect();
+            const x = (rect.left + rect.width / 2) / window.innerWidth;
+            const y = (rect.top + rect.height / 2) / window.innerHeight;
+            
+            confetti({
+                particleCount: 30,
+                spread: 40,
+                origin: { x, y },
+                colors: ['#28a745', '#20c997', '#3bc9db']
+            });
+        }
+
+        function checkBingo() {
+            // Check rows
+            for (let i = 0; i < 5; i++) {
+                if (bingoState.rows[i] === 5 && completedLetters < 5) {
+                    completeBingoLetter();
+                    resetLine('row', i);
+                    return;
+                }
+            }
+            
+            // Check columns
+            for (let j = 0; j < 5; j++) {
+                if (bingoState.cols[j] === 5 && completedLetters < 5) {
+                    completeBingoLetter();
+                    resetLine('col', j);
+                    return;
+                }
+            }
+            
+            // Check diagonals
+            if (bingoState.diagonal1 === 5 && completedLetters < 5) {
+                completeBingoLetter();
+                resetLine('diagonal1');
+                return;
+            }
+            
+            if (bingoState.diagonal2 === 5 && completedLetters < 5) {
+                completeBingoLetter();
+                resetLine('diagonal2');
+                return;
+            }
+        }
+
+        function completeBingoLetter() {
+            if (completedLetters < 5) {
+                const letters = document.querySelectorAll('.bingo-letter');
+                letters[completedLetters].classList.add('completed');
+                
+                // Big confetti for letter completion
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: [
+                        '#FF6B6B', '#4ECDC4', '#45B7D1', 
+                        '#A5D8FF', '#FFD8A8', '#ffffff'
+                    ]
+                });
+                
+                completedLetters++;
+                
+                // Check for full BINGO
+                if (completedLetters === 5) {
+                    setTimeout(showWinCelebration, 1000);
+                }
+            }
+        }
+
+        function showWinCelebration() {
+            const celebration = document.getElementById('winCelebration');
+            celebration.classList.add('active');
+            
+            // Mega confetti blast
+            confetti({
+                particleCount: 300,
+                spread: 100,
+                origin: { y: 0.6 }
+            });
+            
+            // Additional confetti bursts
+            const interval = setInterval(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { x: Math.random(), y: Math.random() * 0.5 }
+                });
+            }, 500);
+            
+            // Stop after 5 seconds
+            setTimeout(() => {
+                clearInterval(interval);
+            }, 5000);
+            
+            // Hide after 6 seconds
+            setTimeout(() => {
+                celebration.classList.remove('active');
+            }, 6000);
+        }
+
+        function resetLine(type, index) {
+            if (type === 'row') {
+                bingoState.rows[index] = 0;
+                for (let col = 0; col < 5; col++) {
+                    completedCells[index][col] = false;
+                    const cell = document.querySelector(`[data-row="${index}"][data-col="${col}"]`);
+                    cell.classList.remove('correct');
+                    cell.innerHTML = '🐛';
+                }
+            } 
+            else if (type === 'col') {
+                bingoState.cols[index] = 0;
+                for (let row = 0; row < 5; row++) {
+                    completedCells[row][index] = false;
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${index}"]`);
+                    cell.classList.remove('correct');
+                    cell.innerHTML = '🐛';
+                }
+            }
+            else if (type === 'diagonal1') {
+                bingoState.diagonal1 = 0;
+                for (let i = 0; i < 5; i++) {
+                    completedCells[i][i] = false;
+                    const cell = document.querySelector(`[data-row="${i}"][data-col="${i}"]`);
+                    cell.classList.remove('correct');
+                    cell.innerHTML = '🐛';
+                }
+            }
+            else if (type === 'diagonal2') {
+                bingoState.diagonal2 = 0;
+                for (let i = 0; i < 5; i++) {
+                    completedCells[i][4 - i] = false;
+                    const cell = document.querySelector(`[data-row="${i}"][data-col="${4 - i}"]`);
+                    cell.classList.remove('correct');
+                    cell.innerHTML = '🐛';
+                }
+            }
+        }
+
+        function resetGame() {
+            // Reset game state
+            bingoState = {
+                rows: new Array(5).fill(0),
+                cols: new Array(5).fill(0),
+                diagonal1: 0,
+                diagonal2: 0
+            };
+            
+            completedCells = new Array(5).fill().map(() => new Array(5).fill(false));
+            completedLetters = 0;
+            
+            // Reset UI
+            document.querySelectorAll('.bug-cell').forEach(cell => {
+                cell.classList.remove('correct');
+                cell.innerHTML = '🐛';
+            });
+            
+            document.querySelectorAll('.bingo-letter').forEach(letter => {
+                letter.classList.remove('completed');
+            });
+            
+            // Close any open modals
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                const bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) bsModal.hide();
+            });
+            
+            // Hide win celebration if active
+            document.getElementById('winCelebration').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
