@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python Bug Bingo Deluxe</title>
+    <title>Python Bug Bingo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -20,6 +20,32 @@
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .help-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+
         
         /* Premium Header */
         .game-header {
@@ -301,10 +327,10 @@
     </style>
 </head>
 <body>
-    <div class="container py-4">
-        <!-- Premium Header with BINGO Letters -->
+    <div class="container py-5">
+        <!-- Header with BINGO Letters -->
         <div class="game-header text-center">
-            <h1 class="game-title">PYTHON BUG BINGO</h1>
+            <h1 class="game-title">Python Bug Bingo</h1>
             <div class="bingo-track" id="bingoProgress">
                 <div class="bingo-letter" style="background-color: #FF6B6B;">B</div>
                 <div class="bingo-letter" style="background-color: #4ECDC4;">I</div>
@@ -314,34 +340,56 @@
             </div>
         </div>
         
-        <!-- Enhanced Bingo Grid -->
+        <!-- Bingo Grid -->
         <div id="grid"></div>
-        
-        <div class="text-center">
-            <button id="resetBtn" class="btn btn-danger btn-lg px-4 py-2">
-                <i class="bi bi-arrow-repeat"></i> Reset Game
-            </button>
+    </div>
+
+    <!-- Help Button -->
+    <div class="help-btn" data-bs-toggle="modal" data-bs-target="#helpModal">?</div>
+
+    <!-- Help Modal -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">How to Play Python Bug Bingo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Game Rules:</h6>
+                    <ol>
+                        <li>Click on any bug cell to reveal a Python code snippet with a bug</li>
+                        <li>Fix the bug in the code editor and submit your solution</li>
+                        <li>If correct, the cell turns green permanently</li>
+                        <li>Complete a row, column, or diagonal to mark a BINGO letter</li>
+                        <li>Complete all 5 letters in BINGO to win!</li>
+                    </ol>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Premium Code Modal -->
-    <div class="modal fade code-modal" id="buggedCodeModal" tabindex="-1" aria-hidden="true">
+    <!-- Bugged Code Modal -->
+    <div class="modal fade" id="buggedCodeModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">FIX THE BUG</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">Fix the Bug</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <h6 class="fw-bold mb-2">Bugged Code:</h6>
+                    <h6>Bugged Code:</h6>
                     <pre id="buggedCode"></pre>
                     
                     <div class="test-case-info bg-light p-3 rounded mb-3">
-                        <div id="testCase" class="fw-bold"></div>
+                        <div id="testCase"></div>
                         <div id="expectedOutput" class="mt-2"></div>
                     </div>
                     
-                    <h6 class="fw-bold mb-2">Your Solution:</h6>
+                    <h6>Your Solution:</h6>
                     <textarea id="userCode" class="form-control mb-3" 
                               placeholder="Enter your corrected code here..." 
                               rows="8" spellcheck="false"></textarea>
@@ -350,7 +398,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button id="submitBtn" type="button" class="btn btn-primary">Submit Fix</button>
+                    <button id="submitBtn" type="button" class="btn btn-primary">Submit</button>
                 </div>
             </div>
         </div>
@@ -362,16 +410,13 @@
         <div class="win-subtext">You've fixed all the bugs and won Python Bug Bingo!</div>
     </div>
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Confetti JS -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <script>
-        // Bug data array (same as before)
-       
+        // Bug data for Python
         const bug_data_python = {
             "bug_1": {
                 "code": "def fibonacci(n):\n    if n == 0:\n        return 1\n    if n == 1:\n        return 1\n    return fibonacci(n - 1) + fibonacci(n - 2)",
@@ -499,7 +544,7 @@
                 "expected_output": "[2, 4, 6]"
             }
         };
-
+       
 
         // Game state
         const bugDataArray = Object.values(bug_data_python).slice(0, 25);
@@ -511,11 +556,11 @@
         };
         let completedCells = new Array(5).fill().map(() => new Array(5).fill(false));
         let completedLetters = 0;
+        let correctAnswers = new Set();
 
         // Initialize the game
         document.addEventListener('DOMContentLoaded', () => {
             createGrid();
-            document.getElementById('resetBtn').addEventListener('click', resetGame);
         });
 
         function createGrid() {
@@ -524,15 +569,18 @@
             
             for (let i = 0; i < 5; i++) {
                 for (let j = 0; j < 5; j++) {
+                    const index = i * 5 + j;
                     const cell = document.createElement('div');
                     cell.className = 'bug-cell';
                     cell.dataset.row = i;
                     cell.dataset.col = j;
+                    cell.dataset.index = index;
                     cell.innerHTML = '🐛';
                     
-                    cell.addEventListener('click', () => {
-                        if (!completedCells[i][j]) {
-                            openModal(i, j);
+                    cell.addEventListener('click', function() {
+                        const clickedIndex = parseInt(this.dataset.index);
+                        if (!correctAnswers.has(clickedIndex)) {
+                            openModal(i, j, clickedIndex);
                         }
                     });
                     
@@ -541,8 +589,7 @@
             }
         }
 
-        function openModal(row, col) {
-            const index = row * 5 + col;
+        function openModal(row, col, index) {
             const bugData = bugDataArray[index];
             
             if (!bugData) {
@@ -550,33 +597,33 @@
                 return;
             }
             
-            // Set modal content
             document.getElementById('buggedCode').textContent = bugData.code;
             document.getElementById('testCase').textContent = `Test Case: ${bugData.test_case}`;
             document.getElementById('expectedOutput').textContent = `Expected Output: ${bugData.expected_output}`;
             document.getElementById('userCode').value = '';
             document.getElementById('testCasesResult').innerHTML = '';
             
-            // Set submit action
-            document.getElementById('submitBtn').onclick = () => submitSolution(row, col, bugData);
+            document.getElementById('submitBtn').onclick = function() {
+                submitSolution(row, col, index, bugData);
+            };
             
-            // Show modal
             const modal = new bootstrap.Modal(document.getElementById('buggedCodeModal'));
             modal.show();
         }
 
-        function submitSolution(row, col, bugData) {
+        function submitSolution(row, col, index, bugData) {
             const userCode = document.getElementById('userCode').value.trim();
             const isCorrect = userCode.length > 0 && userCode !== bugData.code;
             
             if (isCorrect) {
-                // Mark cell as correct
-                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                cell.classList.add('correct');
+                // Mark as permanently correct
+                correctAnswers.add(index);
                 completedCells[row][col] = true;
                 
-                // Trigger cell completion effect
-                triggerCellCelebration(cell);
+                // Update cell appearance
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                cell.classList.add('correct');
+                cell.innerHTML = '✅';
                 
                 // Update Bingo state
                 bingoState.rows[row]++;
@@ -584,17 +631,20 @@
                 if (row === col) bingoState.diagonal1++;
                 if (row + col === 4) bingoState.diagonal2++;
                 
+                // Trigger confetti
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                
                 // Check for completed lines
                 checkBingo();
-            }
-            
-            // Show result message
-            const resultElement = document.getElementById('testCasesResult');
-            if (isCorrect) {
-                resultElement.innerHTML = `
+                
+                // Show success message
+                document.getElementById('testCasesResult').innerHTML = `
                     <div class="alert alert-success d-flex align-items-center">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        Correct! Well done!
+                        ✅ Correct! Well done!
                     </div>
                 `;
                 
@@ -604,27 +654,12 @@
                     modal.hide();
                 }, 1500);
             } else {
-                resultElement.innerHTML = `
+                document.getElementById('testCasesResult').innerHTML = `
                     <div class="alert alert-danger d-flex align-items-center">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        Incorrect, try again!
+                        ❌ Incorrect, try again!
                     </div>
                 `;
             }
-        }
-
-        function triggerCellCelebration(cell) {
-            // Create confetti for cell completion
-            const rect = cell.getBoundingClientRect();
-            const x = (rect.left + rect.width / 2) / window.innerWidth;
-            const y = (rect.top + rect.height / 2) / window.innerHeight;
-            
-            confetti({
-                particleCount: 30,
-                spread: 40,
-                origin: { x, y },
-                colors: ['#28a745', '#20c997', '#3bc9db']
-            });
         }
 
         function checkBingo() {
@@ -632,7 +667,7 @@
             for (let i = 0; i < 5; i++) {
                 if (bingoState.rows[i] === 5 && completedLetters < 5) {
                     completeBingoLetter();
-                    resetLine('row', i);
+                    bingoState.rows[i] = 0; // Reset to prevent multiple triggers
                     return;
                 }
             }
@@ -641,7 +676,7 @@
             for (let j = 0; j < 5; j++) {
                 if (bingoState.cols[j] === 5 && completedLetters < 5) {
                     completeBingoLetter();
-                    resetLine('col', j);
+                    bingoState.cols[j] = 0; // Reset
                     return;
                 }
             }
@@ -649,13 +684,13 @@
             // Check diagonals
             if (bingoState.diagonal1 === 5 && completedLetters < 5) {
                 completeBingoLetter();
-                resetLine('diagonal1');
+                bingoState.diagonal1 = 0; // Reset
                 return;
             }
             
             if (bingoState.diagonal2 === 5 && completedLetters < 5) {
                 completeBingoLetter();
-                resetLine('diagonal2');
+                bingoState.diagonal2 = 0; // Reset
                 return;
             }
         }
@@ -667,13 +702,9 @@
                 
                 // Big confetti for letter completion
                 confetti({
-                    particleCount: 100,
+                    particleCount: 150,
                     spread: 70,
-                    origin: { y: 0.6 },
-                    colors: [
-                        '#FF6B6B', '#4ECDC4', '#45B7D1', 
-                        '#A5D8FF', '#FFD8A8', '#ffffff'
-                    ]
+                    origin: { y: 0.6 }
                 });
                 
                 completedLetters++;
@@ -691,101 +722,10 @@
             
             // Mega confetti blast
             confetti({
-                particleCount: 300,
-                spread: 100,
+                particleCount: 500,
+                spread: 120,
                 origin: { y: 0.6 }
             });
-            
-            // Additional confetti bursts
-            const interval = setInterval(() => {
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { x: Math.random(), y: Math.random() * 0.5 }
-                });
-            }, 500);
-            
-            // Stop after 5 seconds
-            setTimeout(() => {
-                clearInterval(interval);
-            }, 5000);
-            
-            // Hide after 6 seconds
-            setTimeout(() => {
-                celebration.classList.remove('active');
-            }, 6000);
-        }
-
-        function resetLine(type, index) {
-            if (type === 'row') {
-                bingoState.rows[index] = 0;
-                for (let col = 0; col < 5; col++) {
-                    completedCells[index][col] = false;
-                    const cell = document.querySelector(`[data-row="${index}"][data-col="${col}"]`);
-                    cell.classList.remove('correct');
-                    cell.innerHTML = '🐛';
-                }
-            } 
-            else if (type === 'col') {
-                bingoState.cols[index] = 0;
-                for (let row = 0; row < 5; row++) {
-                    completedCells[row][index] = false;
-                    const cell = document.querySelector(`[data-row="${row}"][data-col="${index}"]`);
-                    cell.classList.remove('correct');
-                    cell.innerHTML = '🐛';
-                }
-            }
-            else if (type === 'diagonal1') {
-                bingoState.diagonal1 = 0;
-                for (let i = 0; i < 5; i++) {
-                    completedCells[i][i] = false;
-                    const cell = document.querySelector(`[data-row="${i}"][data-col="${i}"]`);
-                    cell.classList.remove('correct');
-                    cell.innerHTML = '🐛';
-                }
-            }
-            else if (type === 'diagonal2') {
-                bingoState.diagonal2 = 0;
-                for (let i = 0; i < 5; i++) {
-                    completedCells[i][4 - i] = false;
-                    const cell = document.querySelector(`[data-row="${i}"][data-col="${4 - i}"]`);
-                    cell.classList.remove('correct');
-                    cell.innerHTML = '🐛';
-                }
-            }
-        }
-
-        function resetGame() {
-            // Reset game state
-            bingoState = {
-                rows: new Array(5).fill(0),
-                cols: new Array(5).fill(0),
-                diagonal1: 0,
-                diagonal2: 0
-            };
-            
-            completedCells = new Array(5).fill().map(() => new Array(5).fill(false));
-            completedLetters = 0;
-            
-            // Reset UI
-            document.querySelectorAll('.bug-cell').forEach(cell => {
-                cell.classList.remove('correct');
-                cell.innerHTML = '🐛';
-            });
-            
-            document.querySelectorAll('.bingo-letter').forEach(letter => {
-                letter.classList.remove('completed');
-            });
-            
-            // Close any open modals
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                const bsModal = bootstrap.Modal.getInstance(modal);
-                if (bsModal) bsModal.hide();
-            });
-            
-            // Hide win celebration if active
-            document.getElementById('winCelebration').classList.remove('active');
         }
     </script>
 </body>
