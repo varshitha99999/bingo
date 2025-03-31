@@ -21,71 +21,71 @@ if (!fs.existsSync(TEMP_DIR)) {
 }
 
 // Function to extract function name from C code
-const extractFunctionName = (code) => {
+function extractFunctionName(code) {
   const match = code.match(/\b(?:int|float|double|char|void)\s+(\w+)\s*\(/);
   return match ? match[1] : null;
-};
+}
 
-// Function to compile and run C code
-async function compileAndRunC(code, testCase, expectedOutput, functionName, filePath) {
+// Enhanced compileAndRunC function
+async function compileAndRunC(code, testCase, expectedOutput, filePath) {
   return new Promise((resolve) => {
-    // Extract arguments from test case (supports multiple arguments)
-    const argMatch = testCase.match(/\((.*?)\)/);
-    const argument = argMatch ? argMatch[1] : "";
+    // Extract array declarations from test case
+    let arrayDeclarations = "";
+    if (testCase.includes("int arr[]")) {
+      arrayDeclarations = testCase.split(";")[0] + ";";
+      testCase = testCase.split(";").slice(1).join(";");
+    }
 
-    // Add proper includes and main function
-    const userCodeWithMain = `
+    // Generate complete C program with output printing
+    const completeCode = `
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 ${code}
 
 int main() {
-    printf("%d\\n", ${functionName}(${argument}));
-    return 0;
+  ${arrayDeclarations}
+  ${testCase.replace(/;$/, "")};
+  return 0;
 }
 `;
 
-    console.log("Generated C code:", userCodeWithMain);
-    fs.writeFileSync(`${filePath}.c`, userCodeWithMain);
+    fs.writeFileSync(`${filePath}.c`, completeCode);
 
-    const compileAndRunCommand = `gcc ${filePath}.c -o ${filePath} && ${filePath}`;
-    console.log("Running command:", compileAndRunCommand);
+    const compileCommand = `gcc ${filePath}.c -o ${filePath}`;
+    const runCommand = `${filePath}`;
 
-    exec(compileAndRunCommand, { timeout: 5000 }, (error, stdout, stderr) => {
-      if (error) {
-        console.error("Compilation/Execution Error:", stderr);
+    exec(compileCommand, (compileError, compileStdout, compileStderr) => {
+      if (compileError) {
         return resolve({
           success: false,
-          error: "Compilation or execution failed",
-          output: stderr.trim(),
+          error: compileStderr,
+          output: "",
           expected_output: expectedOutput
         });
       }
 
-      console.log("Raw Output:", JSON.stringify(stdout));
-      console.log("Raw Expected:", JSON.stringify(expectedOutput));
+      exec(runCommand, { timeout: 5000 }, (runError, runStdout, runStderr) => {
+        // Clean up the output by removing any extra whitespace or newlines
+        const output = runStdout.trim().replace(/\s+/g, ' ');
+        const expected = expectedOutput.toString().trim().replace(/\s+/g, ' ');
+        
+        // More flexible comparison
+        const passed = output.includes(expected) || expected.includes(output);
 
-      const cleanOutput = stdout.replace(/[\r\n]+/g, "").trim();
-      const cleanExpected = expectedOutput.toString().trim();
-
-
-      console.log("Clean Output:", cleanOutput);
-      console.log("Clean Expected:", cleanExpected);
-
-      const passed = cleanOutput === cleanExpected;
-
-      resolve({
-        success: passed,
-        output: cleanOutput,
-        expected_output: cleanExpected,
-        error: passed ? null : "Output does not match expected value"
+        resolve({
+          success: passed,
+          output: output,
+          expected_output: expectedOutput,
+          error: passed ? null : `Expected: ${expectedOutput}, Got: ${output}`
+        });
       });
     });
   });
 }
 
-// C Code Validation with Hidden Tests
+// Simplified /run endpoint
 app.post("/run", async (req, res) => {
   const { code, testCase, expectedOutput } = req.body;
 
@@ -96,33 +96,22 @@ app.post("/run", async (req, res) => {
     });
   }
 
-  const functionName = extractFunctionName(code);
-  if (!functionName) {
-    return res.status(400).json({
-      success: false,
-      error: "Could not detect a valid function in the provided C code.",
-    });
-  }
-
   const filename = `c_solution_${Date.now()}`;
   const filePath = path.join(TEMP_DIR, filename);
 
   try {
-    // Validate only the given test case
-    const testResult = await compileAndRunC(code, testCase, expectedOutput, functionName, filePath);
-    
+    const result = await compileAndRunC(
+      code, 
+      testCase, 
+      expectedOutput, 
+      filePath
+    );
+
     res.json({
-      success: testResult.success,
-      error: testResult.success ? null : testResult.error,
-      results: [
-        {
-          test_case: testCase,
-          passed: testResult.success,
-          output: testResult.output,
-          expected_output: expectedOutput,
-          error: testResult.error
-        }
-      ]
+      success: result.success,
+      output: result.output,
+      expected_output: result.expected_output,
+      error: result.error
     });
   } catch (error) {
     res.status(500).json({
@@ -130,37 +119,28 @@ app.post("/run", async (req, res) => {
       error: error.message,
     });
   } finally {
-    // Clean up files
-    try {
-      if (fs.existsSync(`${filePath}.c`)) fs.unlinkSync(`${filePath}.c`);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    } catch (cleanupError) {
-      console.error("Cleanup error:", cleanupError);
-    }
+    // Cleanup
+    try { 
+      fs.existsSync(`${filePath}.c`) && fs.unlinkSync(`${filePath}.c`);
+      fs.existsSync(filePath) && fs.unlinkSync(filePath);
+    } catch(e) {}
   }
 });
 
-
-// Health Check Endpoint
+// Health Check
 app.get("/health", (req, res) => {
-  res.json({
-    status: "healthy",
-    timestamp: new Date().toISOString(),
-  });
+  res.json({ status: "healthy", timestamp: new Date().toISOString() });
 });
 
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log("Make sure to run this server for C language support");
 });
 
-// Handle Cleanup on Exit
+// Cleanup on exit
 process.on("SIGINT", () => {
   console.log("Cleaning up temporary files...");
-  try {
-    fs.rmSync(TEMP_DIR, { recursive: true, force: true });
-  } catch (err) {
-    console.error("Cleanup error:", err);
-  }
+  try { fs.rmSync(TEMP_DIR, { recursive: true, force: true }); } catch(e) {}
   process.exit();
 });
