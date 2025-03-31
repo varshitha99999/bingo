@@ -1,44 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bug Bingo</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="styles.css" rel="stylesheet">
-        <!-- Load Pyodide for Python execution -->
-        <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
-        
-        <!-- CheerpJ Initialization - ADD THIS RIGHT BEFORE THE LOADER -->
-        <script>
-          window.cheerpjInit = function() {
-            console.log("CheerpJ initialized");
-            window.cheerpjInitialized = true;
-            if (window.cheerpjPendingInit) {
-              window.cheerpjPendingInit.forEach(resolve => resolve());
-              window.cheerpjPendingInit = null;
-            }
-          };
-          window.cheerpjPendingInit = [];
-        </script>
-        
-        <!-- Load CheerpJ for Java execution - THIS IS YOUR EXISTING SCRIPT -->
-        <script src="https://cjrtnc.leaningtech.com/2.3/loader.js" 
-                onload="console.log('CheerpJ loaded')" 
-                onerror="console.error('Failed to load CheerpJ')"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bug Bingo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
-    <!-- Load Pyodide for Python execution -->
     <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
-    <!-- Load CheerpJ for Java execution -->
-    <script src="https://cjrtnc.leaningtech.com/2.3/loader.js"></script>
-    <!-- Load Emscripten for C execution (will be loaded dynamically) -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
@@ -57,15 +25,6 @@
                     <i class="fab fa-python"></i>
                 </div>
                 <h3>Python</h3>
-                <p>Find and fix bugs in Python code snippets</p>
-            </div>
-            
-            <div class="language-card" onclick="startGame('java')">
-                <div class="language-icon java-icon">
-                    <i class="fab fa-java"></i>
-                </div>
-                <h3>Java</h3>
-                <p>Find and fix bugs in Java code</p>
             </div>
             
             <div class="language-card" onclick="startGame('c')">
@@ -73,7 +32,6 @@
                     <i class="fas fa-code"></i>
                 </div>
                 <h3>C</h3>
-                <p>Find and fix bugs in C code</p>
             </div>
         </div>
     </div>
@@ -83,13 +41,29 @@
         <div class="container py-5">
             <!-- Header with BINGO Letters -->
             <div class="game-header text-center">
-                <h1 class="game-title" id="gameTitle">Bug Bingo</h1>
+                <h1 class="game-title">Bug Bingo</h1>
                 <div class="bingo-track" id="bingoProgress">
                     <div class="bingo-letter" style="background-color: #FF6B6B;">B</div>
                     <div class="bingo-letter" style="background-color: #4ECDC4;">I</div>
                     <div class="bingo-letter" style="background-color: #45B7D1;">N</div>
                     <div class="bingo-letter" style="background-color: #A5D8FF;">G</div>
                     <div class="bingo-letter" style="background-color: #FFD8A8;">O</div>
+                </div>
+                
+                <!-- Game Stats -->
+                <div class="game-stats">
+                    <div class="stat-box">
+                        <span class="stat-label">Score:</span>
+                        <span id="scoreValue" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Time:</span>
+                        <span id="timerValue" class="stat-value">00:00</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Focus:</span>
+                        <span id="focusValue" class="stat-value">100%</span>
+                    </div>
                 </div>
             </div>
             
