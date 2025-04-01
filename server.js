@@ -26,18 +26,11 @@ function extractFunctionName(code) {
   return match ? match[1] : null;
 }
 
-// Enhanced compileAndRunC function
+// Enhanced compileAndRunC function with proper output handling
 async function compileAndRunC(code, testCase, expectedOutput, filePath) {
   return new Promise((resolve) => {
-    // Extract array declarations from test case
-    let arrayDeclarations = "";
-    if (testCase.includes("int arr[]")) {
-      arrayDeclarations = testCase.split(";")[0] + ";";
-      testCase = testCase.split(";").slice(1).join(";");
-    }
-
-    // Generate complete C program with output printing
-    const completeCode = `
+    // Generate complete C program
+    let completeCode = `
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,7 +38,6 @@ async function compileAndRunC(code, testCase, expectedOutput, filePath) {
 ${code}
 
 int main() {
-  ${arrayDeclarations}
   ${testCase.replace(/;$/, "")};
   return 0;
 }
@@ -58,6 +50,12 @@ int main() {
 
     exec(compileCommand, (compileError, compileStdout, compileStderr) => {
       if (compileError) {
+        // Cleanup on error
+        try {
+          fs.existsSync(`${filePath}.c`) && fs.unlinkSync(`${filePath}.c`);
+          fs.existsSync(filePath) && fs.unlinkSync(filePath);
+        } catch (e) {}
+        
         return resolve({
           success: false,
           error: compileStderr,
@@ -67,25 +65,53 @@ int main() {
       }
 
       exec(runCommand, { timeout: 5000 }, (runError, runStdout, runStderr) => {
-        // Clean up the output by removing any extra whitespace or newlines
-        const output = runStdout.trim().replace(/\s+/g, ' ');
-        const expected = expectedOutput.toString().trim().replace(/\s+/g, ' ');
+        // Cleanup after execution
+        try {
+          fs.existsSync(`${filePath}.c`) && fs.unlinkSync(`${filePath}.c`);
+          fs.existsSync(filePath) && fs.unlinkSync(filePath);
+        } catch (e) {}
+
+        if (runError) {
+          return resolve({
+            success: false,
+            error: runError.signal === 'SIGTERM' ? 
+              "Timeout: Program took too long to execute" : 
+              runError.message,
+            output: "",
+            expected_output: expectedOutput
+          });
+        }
+
+        // Process output
+        const outputLines = runStdout.split(/\r?\n/)
+          .filter(line => line.trim().length > 0)
+          .map(line => line.trim());
         
-        // More flexible comparison
-        const passed = output.includes(expected) || expected.includes(output);
+        const actualOutput = outputLines.join(' ').trim();
+        const expected = expectedOutput.toString().trim();
+
+        console.log("----- ACTUAL OUTPUT -----");
+        console.log(JSON.stringify(actualOutput));
+        console.log("----- EXPECTED OUTPUT -----");
+        console.log(JSON.stringify(expected));
+        console.log("----- HEX DUMP -----");
+        console.log("Actual:  ", Buffer.from(actualOutput).toString('hex'));
+        console.log("Expected:", Buffer.from(expected).toString('hex'));
+
+        const passed = actualOutput === expected;
 
         resolve({
           success: passed,
-          output: output,
-          expected_output: expectedOutput,
-          error: passed ? null : `Expected: ${expectedOutput}, Got: ${output}`
+          output: actualOutput,
+          expected_output: expected,
+          error: passed ? null : `Expected: ${expected}, Got: ${actualOutput}`
         });
       });
     });
   });
 }
 
-// Simplified /run endpoint
+// Run endpoint with enhanced output processing
 app.post("/run", async (req, res) => {
   const { code, testCase, expectedOutput } = req.body;
 
@@ -118,18 +144,17 @@ app.post("/run", async (req, res) => {
       success: false,
       error: error.message,
     });
-  } finally {
-    // Cleanup
-    try { 
-      fs.existsSync(`${filePath}.c`) && fs.unlinkSync(`${filePath}.c`);
-      fs.existsSync(filePath) && fs.unlinkSync(filePath);
-    } catch(e) {}
   }
 });
 
 // Health Check
 app.get("/health", (req, res) => {
-  res.json({ status: "healthy", timestamp: new Date().toISOString() });
+  res.json({ 
+    status: "healthy", 
+    timestamp: new Date().toISOString(),
+    environment: "C language support",
+    version: "1.0.1"
+  });
 });
 
 // Start Server
@@ -140,7 +165,21 @@ app.listen(PORT, () => {
 
 // Cleanup on exit
 process.on("SIGINT", () => {
-  console.log("Cleaning up temporary files...");
-  try { fs.rmSync(TEMP_DIR, { recursive: true, force: true }); } catch(e) {}
+  console.log("\nCleaning up temporary files...");
+  try { 
+    fs.rmSync(TEMP_DIR, { recursive: true, force: true });
+  } catch(e) {
+    console.error("Cleanup error:", e);
+  }
   process.exit();
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
