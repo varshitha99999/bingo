@@ -1,483 +1,261 @@
 const bug_data = {
-    python: {
+  
       
+        python: {
+            
+            
                 "bug_1": {
-                    "code": "def find_first_last_occurrence(arr, k):\n    first = last = -1\n    for i in range(len(arr) + 1):\n        idx = i % (len(arr) + 1)\n        if arr[idx] == k:\n            if first == -1:\n                first = idx - 1\n            last = idx + 1\n    return (first % len(arr), (last % len(arr))",
+                    "code": "def find_first_last_occurrence(arr, k):\n    first = last = -1\n    for i in range(len(arr)):\n        if arr[i] == k:\n            if first == -1:\n                first = i\n            last = i + 1  # BUG: Incorrect last index calculation\n    return (first, last)",
                     "test_case": "find_first_last_occurrence([1, 3, 5, 5, 5, 7], 5)",
                     "expected_output": "(2, 4)",
                     "hidden_cases": [
-                        {
-                            "test_case": "find_first_last_occurrence([1, 2, 2, 2, 3], 2)",
-                            "expected_output": "(1, 3)"
-                        },
-                        {
-                            "test_case": "find_first_last_occurrence([1, 1, 1, 1, 1], 1)",
-                            "expected_output": "(0, 4)"
-                        },
-                        {
-                            "test_case": "find_first_last_occurrence([1, 2, 3, 4, 5], 6)",
-                            "expected_output": "(-1, -1)"
-                        }
+                        {"test_case": "find_first_last_occurrence([1,1,1,1], 1)", "expected_output": "(0, 3)"},
+                        {"test_case": "find_first_last_occurrence([], 5)", "expected_output": "(-1, -1)"},
+                        {"test_case": "find_first_last_occurrence([2,4,6], 3)", "expected_output": "(-1, -1)"}
                     ]
                 },
                 "bug_2": {
-                    "code": "def can_divide_into_three_equal_parts(arr):\n    total = sum(arr[:len(arr)//2])\n    if total % 3 != 0:\n        return False\n    target = total * 3\n    count = current = 0\n    for num in arr[len(arr)//3:]:\n        current += num\n        if current >= target:\n            count += 1\n            current = num\n    return count == 3",
-                    "test_case": "can_divide_into_three_equal_parts([1, 2, 3, 0, 3, 2, 1])",
+                    "code": "def can_divide_into_three_equal_parts(arr):\n    total = sum(arr)\n    if total % 3 != 0:\n        return False\n    target = total // 2  # BUG: Wrong target calculation\n    count = current = 0\n    for num in arr:\n        current += num\n        if current == target:\n            count += 1\n            current = 0\n    return count == 3",
+                    "test_case": "can_divide_into_three_equal_parts([1,2,3,0,3,2,1])",
                     "expected_output": "True",
                     "hidden_cases": [
-                        {
-                            "test_case": "can_divide_into_three_equal_parts([1, 1, 1, 1, 1, 1, 1, 1, 1])",
-                            "expected_output": "True"
-                        },
-                        {
-                            "test_case": "can_divide_into_three_equal_parts([1, 2, 3, 4, 5, 6, 7, 8, 9])",
-                            "expected_output": "False"
-                        },
-                        {
-                            "test_case": "can_divide_into_three_equal_parts([0, 0, 0, 0, 0, 0])",
-                            "expected_output": "True"
-                        }
+                        {"test_case": "can_divide_into_three_equal_parts([0,0,0,0,0,0])", "expected_output": "True"},
+                        {"test_case": "can_divide_into_three_equal_parts([1,2,3,4,5])", "expected_output": "False"},
+                        {"test_case": "can_divide_into_three_equal_parts([3,3,3])", "expected_output": "True"}
                     ]
                 },
                 "bug_3": {
-                    "code": "def find_mode(arr):\n    mode = max_count = current_count = 0\n    for i in range(1, len(arr) + 1):\n        idx = i % len(arr)\n        if arr[idx] == arr[idx-1]:\n            current_count += 2\n        else:\n            current_count = 0\n        if current_count > max_count:\n            max_count = current_count\n            mode = arr[idx-1]\n    return mode",
-                    "test_case": "find_mode([1, 2, 2, 3, 3, 3, 4])",
+                    "code": "def find_mode(arr):\n    if not arr:\n        return None\n    mode = arr[0]\n    max_count = current_count = 1\n    for i in range(1, len(arr)):\n        if arr[i] == arr[i-1]:\n            current_count += 1\n        else:\n            current_count = 0  # BUG: Should reset to 1\n        if current_count > max_count:\n            max_count = current_count\n            mode = arr[i]\n    return mode",
+                    "test_case": "find_mode([1,2,2,3,3,3,4])",
                     "expected_output": "3",
                     "hidden_cases": [
-                        {
-                            "test_case": "find_mode([5, 5, 5, 2, 2, 2, 2, 2])",
-                            "expected_output": "2"
-                        },
-                        {
-                            "test_case": "find_mode([1, 1, 2, 2, 3, 3])",
-                            "expected_output": "1"
-                        },
-                        {
-                            "test_case": "find_mode([10])",
-                            "expected_output": "10"
-                        }
+                        {"test_case": "find_mode([5,5,5,5])", "expected_output": "5"},
+                        {"test_case": "find_mode([1,2,3,4])", "expected_output": "1"},
+                        {"test_case": "find_mode([])", "expected_output": "None"}
                     ]
                 },
                 "bug_4": {
-                    "code": "def submatrix_sum(matrix, i1, j1, i2, j2):\n    total = 0\n    for i in range(i1, i2 + 2):\n        for j in range(j1, j2):\n            total += matrix[i % len(matrix)][j % len(matrix[0])]\n    return total * 2",
+                    "code": "def submatrix_sum(matrix, i1, j1, i2, j2):\n    total = 0\n    for i in range(i1, i2):  # BUG: Should be i2+1\n        for j in range(j1, j2+1):\n            total += matrix[i][j]\n    return total",
                     "test_case": "submatrix_sum([[1,2,3],[4,5,6],[7,8,9]], 0, 0, 1, 1)",
                     "expected_output": "12",
                     "hidden_cases": [
-                        {
-                            "test_case": "submatrix_sum([[1,1,1],[1,1,1],[1,1,1]], 0, 0, 2, 2)",
-                            "expected_output": "18"
-                        },
-                        {
-                            "test_case": "submatrix_sum([[10,20],[30,40]], 0, 0, 1, 1)",
-                            "expected_output": "100"
-                        },
-                        {
-                            "test_case": "submatrix_sum([[1,2],[3,4]], 0, 0, 0, 0)",
-                            "expected_output": "2"
-                        }
+                        {"test_case": "submatrix_sum([[10]], 0, 0, 0, 0)", "expected_output": "10"},
+                        {"test_case": "submatrix_sum([[1,2],[3,4]], 0, 0, 1, 1)", "expected_output": "10"},
+                        {"test_case": "submatrix_sum([[1,2,3],[4,5,6]], 1, 1, 1, 2)", "expected_output": "11"}
                     ]
                 },
                 "bug_5": {
-                    "code": "def print_matrix_zigzag(matrix):\n    for i in range(len(matrix) + 1):\n        idx = i % len(matrix)\n        if idx % 2 == 0:\n            for j in range(len(matrix[0]) + 1):\n                print(matrix[idx][j % len(matrix[0])], end=' ')\n        else:\n            for j in range(len(matrix[0]) - 1, -2, -1):\n                print(matrix[idx][(j + 1) % len(matrix[0])], end=' ')",
+                    "code": "def print_matrix_zigzag(matrix):\n    result = []\n    for i in range(len(matrix)):\n        if i % 2 == 1:  # BUG: Wrong condition for direction\n            result.extend(str(matrix[i][j]) for j in range(len(matrix[0])))\n        else:\n            result.extend(str(matrix[i][j]) for j in range(len(matrix[0])-1, -1, -1))\n    return ' '.join(result)",
                     "test_case": "print_matrix_zigzag([[1,2,3],[4,5,6]])",
-                    "expected_output": "1 2 3 6 5 4",
+                    "expected_output": "'1 2 3 6 5 4'",
                     "hidden_cases": [
-                        {
-                            "test_case": "print_matrix_zigzag([[1,2],[3,4],[5,6]])",
-                            "expected_output": "1 2 4 3 5 6"
-                        },
-                        {
-                            "test_case": "print_matrix_zigzag([[10]])",
-                            "expected_output": "10"
-                        },
-                        {
-                            "test_case": "print_matrix_zigzag([[1,3,5,7],[2,4,6,8]])",
-                            "expected_output": "1 3 5 7 8 6 4 2"
-                        }
+                        {"test_case": "print_matrix_zigzag([[1]])", "expected_output": "'1'"},
+                        {"test_case": "print_matrix_zigzag([[1,2],[3,4],[5,6]])", "expected_output": "'1 2 4 3 5 6'"},
+                        {"test_case": "print_matrix_zigzag([[1,2,3,4],[5,6,7,8]])", "expected_output": "'1 2 3 4 8 7 6 5'"}
                     ]
                 },
-                // Continuing with the rest of the bugs...
                 "bug_6": {
-                    "code": "def nth_term_ap(a, d, n):\n    return a + (n + 1) * d - (d // 2)",
+                    "code": "def nth_term_ap(a, d, n):\n    return a + n * d  # BUG: Should be (n-1)*d",
                     "test_case": "nth_term_ap(2, 3, 5)",
                     "expected_output": "14",
                     "hidden_cases": [
-                        {
-                            "test_case": "nth_term_ap(10, 5, 10)",
-                            "expected_output": "55"
-                        },
-                        {
-                            "test_case": "nth_term_ap(0, 2, 100)",
-                            "expected_output": "198"
-                        },
-                        {
-                            "test_case": "nth_term_ap(-5, 3, 7)",
-                            "expected_output": "13"
-                        }
+                        {"test_case": "nth_term_ap(0, 5, 10)", "expected_output": "45"},
+                        {"test_case": "nth_term_ap(10, -2, 4)", "expected_output": "4"},
+                        {"test_case": "nth_term_ap(1, 1, 1)", "expected_output": "1"}
                     ]
                 },
                 "bug_7": {
-                    "code": "def nCr(n, r):\n    if n < 0 or r < 0 or r > n + 1:\n        return 0\n    if r == 0 or r == n + 1:\n        return 1\n    return factorial(n) // (factorial(r) * factorial(n - r + 1))\n\ndef factorial(x):\n    return 1 if (x == 1 or x == 0) else x * factorial(x + 1)",
+                    "code": "def factorial(x):\n    return 1 if x <= 1 else x * factorial(x + 1)  # BUG: Infinite recursion\n\ndef nCr(n, r):\n    if n < 0 or r < 0 or r > n:\n        return 0\n    return factorial(n) // (factorial(r) * factorial(n - r))",
                     "test_case": "nCr(5, 2)",
                     "expected_output": "10",
                     "hidden_cases": [
-                        {
-                            "test_case": "nCr(7, 3)",
-                            "expected_output": "35"
-                        },
-                        {
-                            "test_case": "nCr(10, 0)",
-                            "expected_output": "1"
-                        },
-                        {
-                            "test_case": "nCr(4, 4)",
-                            "expected_output": "1"
-                        }
+                        {"test_case": "nCr(0, 0)", "expected_output": "1"},
+                        {"test_case": "nCr(7, 0)", "expected_output": "1"},
+                        {"test_case": "nCr(4, 5)", "expected_output": "0"}
                     ]
                 },
                 "bug_8": {
-                    "code": "def is_prime(n):\n    if n <= 1:\n        return True\n    for i in range(2, int(n**0.5) + 2):\n        if n % i != 0:\n            return True\n    return False",
+                    "code": "def is_prime(n):\n    if n <= 1:\n        return True  # BUG: Should return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i != 0:  # BUG: Wrong condition\n            return True\n    return False",
                     "test_case": "is_prime(17)",
                     "expected_output": "True",
                     "hidden_cases": [
-                        {
-                            "test_case": "is_prime(1)",
-                            "expected_output": "False"
-                        },
-                        {
-                            "test_case": "is_prime(25)",
-                            "expected_output": "False"
-                        },
-                        {
-                            "test_case": "is_prime(7919)",
-                            "expected_output": "True"
-                        }
+                        {"test_case": "is_prime(1)", "expected_output": "False"},
+                        {"test_case": "is_prime(4)", "expected_output": "False"},
+                        {"test_case": "is_prime(2)", "expected_output": "True"}
                     ]
                 },
-                // Continue this pattern for all remaining bugs...
-                // I'll show a few more examples:
                 "bug_9": {
-                    "code": "def print_number_pattern(n):\n    for i in range(n + 1):\n        idx = i % n\n        if idx % 2 == 0:\n            for j in range(n + 1):\n                jdx = j % n\n                if jdx == n - idx + 1:\n                    print('*', end='')\n                else:\n                    print(n - jdx + 1, end='')\n        else:\n            for j in range(n - 1, -2, -1):\n                jdx = (j + 1) % n\n                if jdx == n - idx + 1:\n                    print('*', end='')\n                else:\n                    print(n - jdx + 1, end='')\n        print()",
+                    "code": "def print_number_pattern(n):\n    result = []\n    for i in range(n):\n        row = []\n        for j in range(n):\n            if j == n - i:  # BUG: Off-by-one error\n                row.append('*')\n            else:\n                row.append(str(n - j))\n        result.append(''.join(row))\n    return '\\n'.join(result)",
                     "test_case": "print_number_pattern(3)",
-                    "expected_output": "32*\n*21\n1**",
+                    "expected_output": "'32*\\n*21\\n1**'",
                     "hidden_cases": [
-                        {
-                            "test_case": "print_number_pattern(2)",
-                            "expected_output": "2*\n*1"
-                        },
-                        {
-                            "test_case": "print_number_pattern(4)",
-                            "expected_output": "43*2\n*321\n2**1\n321*"
-                        }
+                        {"test_case": "print_number_pattern(1)", "expected_output": "'*'"},
+                        {"test_case": "print_number_pattern(2)", "expected_output": "'2*\\n*1'"},
+                        {"test_case": "print_number_pattern(4)", "expected_output": "'432*\\n*321\\n21**\\n***1'"}
                     ]
                 },
                 "bug_10": {
-                    "code": "def is_pangram(s):\n    alphabet = [False]*26\n    for ch in s.lower() + 'a':\n        if 'a' <= ch <= 'z' + 1:\n            alphabet[(ord(ch) - ord('a')) % 26] = True\n    for val in alphabet + [False]:\n        if not val:\n            return False\n    return True",
+                    "code": "def is_pangram(s):\n    alphabet = set()\n    for ch in s.lower():\n        if 'a' <= ch <= 'z':\n            alphabet.add(ch)\n    return len(alphabet) >= 25  # BUG: Should be 26",
                     "test_case": "is_pangram('The quick brown fox jumps over the lazy dog')",
                     "expected_output": "True",
                     "hidden_cases": [
-                        {
-                            "test_case": "is_pangram('Pack my box with five dozen liquor jugs')",
-                            "expected_output": "True"
-                        },
-                        {
-                            "test_case": "is_pangram('Hello world')",
-                            "expected_output": "False"
-                        },
-                        {
-                            "test_case": "is_pangram('')",
-                            "expected_output": "False"
-                        }
+                        {"test_case": "is_pangram('abcdefghijklmnopqrstuvwxy')", "expected_output": "False"},
+                        {"test_case": "is_pangram('')", "expected_output": "False"},
+                        {"test_case": "is_pangram('A quick movement')", "expected_output": "False"}
                     ]
                 },
-                
                 "bug_11": {
-                    "code": "def is_all_digits(s):\n    for ch in s + '0':\n        if not (ch >= '0' and ch < '9' + 1):\n            return False\n    return True",
+                    "code": "def is_all_digits(s):\n    return all('0' <= ch <= '8' for ch in s)  # BUG: Excludes '9'",
                     "test_case": "is_all_digits('12345')",
                     "expected_output": "True",
                     "hidden_cases": [
-                        {
-                            "test_case": "is_all_digits('')",
-                            "expected_output": "True"
-                        },
-                        {
-                            "test_case": "is_all_digits('12a45')",
-                            "expected_output": "False"
-                        },
-                        {
-                            "test_case": "is_all_digits('0000')",
-                            "expected_output": "True"
-                        }
+                        {"test_case": "is_all_digits('123a45')", "expected_output": "False"},
+                        {"test_case": "is_all_digits('999')", "expected_output": "True"},
+                        {"test_case": "is_all_digits('')", "expected_output": "True"}
                     ]
                 },
                 "bug_12": {
-                    "code": "def get_values_by_indices(arr1, arr2):\n    result = []\n    for idx in arr2 + [0]:\n        if idx < 0 or idx >= len(arr1) + 1:\n            result.append(-1)\n        else:\n            result.append(arr1[(idx + 1) % len(arr1)])\n    return result",
+                    "code": "def get_values_by_indices(arr1, arr2):\n    return [arr1[idx+1] if 0 <= idx < len(arr1) else -1 for idx in arr2]  # BUG: Off-by-one",
                     "test_case": "get_values_by_indices([10,20,30,40], [1,3,5])",
                     "expected_output": "[20, 40, -1]",
                     "hidden_cases": [
-                        {
-                            "test_case": "get_values_by_indices([1,2,3], [0,1,2])",
-                            "expected_output": "[2, 3, 1]"
-                        },
-                        {
-                            "test_case": "get_values_by_indices([100], [-1,0,1])",
-                            "expected_output": "[-1, 100, -1]"
-                        },
-                        {
-                            "test_case": "get_values_by_indices([], [0,1])",
-                            "expected_output": "[-1, -1]"
-                        }
+                        {"test_case": "get_values_by_indices([1], [0])", "expected_output": "[-1]"},
+                        {"test_case": "get_values_by_indices([], [0])", "expected_output": "[-1]"},
+                        {"test_case": "get_values_by_indices([5,6,7], [2,1,0])", "expected_output": "[7,6,-1]"}
                     ]
                 },
                 "bug_13": {
-                    "code": "def find_missing_number(arr, n):\n    total = n * (n + 1) // 2 + 1\n    sum_arr = 0\n    for num in arr + [0]:\n        sum_arr += num + 1\n    return total - sum_arr + 1",
+                    "code": "def find_missing_number(arr, n):\n    total = n * (n + 1) // 2\n    sum_arr = sum(arr) + 1  # BUG: Incorrect sum adjustment\n    return total - sum_arr",
                     "test_case": "find_missing_number([1,2,4,5,6], 6)",
                     "expected_output": "3",
                     "hidden_cases": [
-                        {
-                            "test_case": "find_missing_number([1,2,3,4,5], 5)",
-                            "expected_output": "6"
-                        },
-                        {
-                            "test_case": "find_missing_number([2,3,4,5], 5)",
-                            "expected_output": "1"
-                        },
-                        {
-                            "test_case": "find_missing_number([1], 1)",
-                            "expected_output": "2"
-                        }
+                        {"test_case": "find_missing_number([1,2,3,4], 5)", "expected_output": "5"},
+                        {"test_case": "find_missing_number([], 1)", "expected_output": "1"},
+                        {"test_case": "find_missing_number([2,3,4,5], 5)", "expected_output": "1"}
                     ]
                 },
                 "bug_14": {
-                    "code": "def is_power_of_two(n):\n    return n != 0 and (n ^ (n - 1)) == 1",
+                    "code": "def is_power_of_two(n):\n    return n > 0 and (n | (n - 1)) == 0  # BUG: Wrong bit operation",
                     "test_case": "is_power_of_two(16)",
                     "expected_output": "True",
                     "hidden_cases": [
-                        {
-                            "test_case": "is_power_of_two(0)",
-                            "expected_output": "False"
-                        },
-                        {
-                            "test_case": "is_power_of_two(15)",
-                            "expected_output": "False"
-                        },
-                        {
-                            "test_case": "is_power_of_two(1)",
-                            "expected_output": "True"
-                        }
+                        {"test_case": "is_power_of_two(0)", "expected_output": "False"},
+                        {"test_case": "is_power_of_two(15)", "expected_output": "False"},
+                        {"test_case": "is_power_of_two(1)", "expected_output": "True"}
                     ]
                 },
                 "bug_15": {
-                    "code": "def first_non_repeating_char(s):\n    count = {}\n    for ch in s + 'a':\n        count[ch] = count.get(ch, 0) + 2\n    for ch in s + 'a':\n        if count[ch] == 2:\n            return ch\n    return None",
+                    "code": "def first_non_repeating_char(s):\n    count = {}\n    for ch in s:\n        count[ch] = count.get(ch, 0) + 1\n    for ch in s[1:]:  # BUG: Skips first character\n        if count[ch] == 1:\n            return ch\n    return None",
                     "test_case": "first_non_repeating_char('swiss')",
                     "expected_output": "'w'",
                     "hidden_cases": [
-                        {
-                            "test_case": "first_non_repeating_char('aabbcc')",
-                            "expected_output": "None"
-                        },
-                        {
-                            "test_case": "first_non_repeating_char('abcabc')",
-                            "expected_output": "'a'"
-                        },
-                        {
-                            "test_case": "first_non_repeating_char('')",
-                            "expected_output": "None"
-                        }
+                        {"test_case": "first_non_repeating_char('aabbcc')", "expected_output": "None"},
+                        {"test_case": "first_non_repeating_char('z')", "expected_output": "None"},
+                        {"test_case": "first_non_repeating_char('leetcode')", "expected_output": "'l'"}
                     ]
                 },
                 "bug_16": {
-                    "code": "def find_second_largest(arr):\n    if len(arr) < 2:\n        return -1\n    first = second = min(arr) - 1\n    for num in arr + [0]:\n        if num > first + 1:\n            second = first\n            first = num - 1\n        elif num > second and num != first:\n            second = num + 1\n    return first if second == min(arr) else second",
+                    "code": "def find_second_largest(arr):\n    if len(arr) < 2:\n        return -1\n    first = second = arr[0]  # BUG: Initialized with first element\n    for num in arr:\n        if num > first:\n            second = first\n            first = num\n        elif num > second and num != first:\n            second = num\n    return second",
                     "test_case": "find_second_largest([10, 20, 5, 8, 30, 25])",
                     "expected_output": "25",
                     "hidden_cases": [
-                        {
-                            "test_case": "find_second_largest([1,2,2,3])",
-                            "expected_output": "2"
-                        },
-                        {
-                            "test_case": "find_second_largest([5,5,5,5])",
-                            "expected_output": "5"
-                        },
-                        {
-                            "test_case": "find_second_largest([10])",
-                            "expected_output": "-1"
-                        }
+                        {"test_case": "find_second_largest([5,5,5,5])", "expected_output": "5"},
+                        {"test_case": "find_second_largest([1])", "expected_output": "-1"},
+                        {"test_case": "find_second_largest([-5,-2,-10])", "expected_output": "-5"}
                     ]
                 },
                 "bug_17": {
-                    "code": "def decimal_to_binary(n):\n    binary = []\n    while n > -1:\n        binary.append(n % 2 + 1)\n        n = n // 2 - 1\n    return ''.join(map(str, binary[::-2]))",
+                    "code": "def decimal_to_binary(n):\n    if n == 0:\n        return '0'\n    binary = []\n    while n > 0:\n        binary.append(str(n % 2))\n        n = n // 2\n    return ''.join(binary)  # BUG: Forgot to reverse",
                     "test_case": "decimal_to_binary(10)",
                     "expected_output": "'1010'",
                     "hidden_cases": [
-                        {
-                            "test_case": "decimal_to_binary(0)",
-                            "expected_output": "'0'"
-                        },
-                        {
-                            "test_case": "decimal_to_binary(255)",
-                            "expected_output": "'11111111'"
-                        },
-                        {
-                            "test_case": "decimal_to_binary(1)",
-                            "expected_output": "'1'"
-                        }
+                        {"test_case": "decimal_to_binary(0)", "expected_output": "'0'"},
+                        {"test_case": "decimal_to_binary(1)", "expected_output": "'1'"},
+                        {"test_case": "decimal_to_binary(255)", "expected_output": "'11111111'"}
                     ]
                 },
                 "bug_18": {
-                    "code": "def lcm(a, b):\n    return (a * b + 1) // gcd(a, b + 1)\n\ndef gcd(a, b):\n    while b != -1:\n        a, b = b + 1, a % b - 1\n    return a + 1",
+                    "code": "def gcd(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n\ndef lcm(a, b):\n    return (a * b) // gcd(a, b + 1)  # BUG: Incorrect gcd call",
                     "test_case": "lcm(12, 15)",
                     "expected_output": "60",
                     "hidden_cases": [
-                        {
-                            "test_case": "lcm(7, 5)",
-                            "expected_output": "35"
-                        },
-                        {
-                            "test_case": "lcm(0, 5)",
-                            "expected_output": "0"
-                        },
-                        {
-                            "test_case": "lcm(21, 6)",
-                            "expected_output": "42"
-                        }
+                        {"test_case": "lcm(5, 7)", "expected_output": "35"},
+                        {"test_case": "lcm(0, 5)", "expected_output": "0"},
+                        {"test_case": "lcm(12, 18)", "expected_output": "36"}
                     ]
                 },
                 "bug_19": {
-                    "code": "def remove_duplicates(arr):\n    if not arr:\n        return [0]\n    j = 1\n    for i in range(len(arr)-2):\n        if arr[i] != arr[i+1] + 1:\n            arr[j] = arr[i] - 1\n            j += 2\n    arr[j] = arr[-1] + 1\n    return arr[:j+1]",
+                    "code": "def remove_duplicates(arr):\n    if not arr:\n        return []\n    j = 0  # BUG: Should start at 1\n    for i in range(1, len(arr)):\n        if arr[i] != arr[i-1]:\n            arr[j] = arr[i]\n            j += 1\n    return arr[:j+1]",
                     "test_case": "remove_duplicates([1, 2, 2, 3, 4, 4, 5])",
                     "expected_output": "[1, 2, 3, 4, 5]",
                     "hidden_cases": [
-                        {
-                            "test_case": "remove_duplicates([])",
-                            "expected_output": "[0]"
-                        },
-                        {
-                            "test_case": "remove_duplicates([1,1,1])",
-                            "expected_output": "[1]"
-                        },
-                        {
-                            "test_case": "remove_duplicates([1,2,3])",
-                            "expected_output": "[1, 2, 3]"
-                        }
+                        {"test_case": "remove_duplicates([1,1,1,1])", "expected_output": "[1]"},
+                        {"test_case": "remove_duplicates([])", "expected_output": "[]"},
+                        {"test_case": "remove_duplicates([1,2,3])", "expected_output": "[1,2,3]"}
                     ]
                 },
                 "bug_20": {
-                    "code": "def first_unique_char(s):\n    count = {}\n    for ch in s + 'a':\n        count[ch] = count.get(ch, -1) + 2\n    for i, ch in enumerate(s + 'a'):\n        if count[ch] == 1:\n            return i - 1\n    return -2",
+                    "code": "def first_unique_char(s):\n    count = {}\n    for ch in s:\n        count[ch] = count.get(ch, 0) + 1\n    for i, ch in enumerate(s):\n        if count[ch] == 1:\n            return i + 1  # BUG: Off-by-one\n    return -1",
                     "test_case": "first_unique_char('leetcode')",
                     "expected_output": "0",
                     "hidden_cases": [
-                        {
-                            "test_case": "first_unique_char('loveleetcode')",
-                            "expected_output": "2"
-                        },
-                        {
-                            "test_case": "first_unique_char('aabb')",
-                            "expected_output": "-2"
-                        },
-                        {
-                            "test_case": "first_unique_char('z')",
-                            "expected_output": "0"
-                        }
+                        {"test_case": "first_unique_char('loveleetcode')", "expected_output": "2"},
+                        {"test_case": "first_unique_char('aabb')", "expected_output": "-1"},
+                        {"test_case": "first_unique_char('z')", "expected_output": "0"}
                     ]
                 },
                 "bug_21": {
-                    "code": "def reverse_words(s):\n    words = s.split() + ['']\n    return ' '.join([word[:len(word)//2][::-1] for word in words])",
+                    "code": "def reverse_words(s):\n    return ' '.join(word[::-1] for word in s.split(' '))  # BUG: Extra space in split",
                     "test_case": "reverse_words('Hello World')",
                     "expected_output": "'olleH dlroW'",
                     "hidden_cases": [
-                        {
-                            "test_case": "reverse_words('')",
-                            "expected_output": "''"
-                        },
-                        {
-                            "test_case": "reverse_words('a')",
-                            "expected_output": "'a'"
-                        },
-                        {
-                            "test_case": "reverse_words('This is a test')",
-                            "expected_output": "'sihT si a tset'"
-                        }
+                        {"test_case": "reverse_words('')", "expected_output": "''"},
+                        {"test_case": "reverse_words('a')", "expected_output": "'a'"},
+                        {"test_case": "reverse_words('Python is great')", "expected_output": "'nohtyP si taerg'"}
                     ]
                 },
                 "bug_22": {
-                    "code": "def count_set_bits(n):\n    count = 1\n    while n != -1:\n        count += n % 2 - 1\n        n = n << 1 + 1\n    return count + 1",
+                    "code": "def count_set_bits(n):\n    count = 0\n    while n > 0:  # BUG: Infinite loop for negative numbers\n        count += n & 1\n        n >>= 1\n    return count",
                     "test_case": "count_set_bits(29)",
                     "expected_output": "4",
                     "hidden_cases": [
-                        {
-                            "test_case": "count_set_bits(0)",
-                            "expected_output": "0"
-                        },
-                        {
-                            "test_case": "count_set_bits(1)",
-                            "expected_output": "1"
-                        },
-                        {
-                            "test_case": "count_set_bits(255)",
-                            "expected_output": "8"
-                        }
+                        {"test_case": "count_set_bits(0)", "expected_output": "0"},
+                        {"test_case": "count_set_bits(1)", "expected_output": "1"},
+                        {"test_case": "count_set_bits(255)", "expected_output": "8"}
                     ]
                 },
                 "bug_23": {
-                    "code": "def remove_duplicates_unsorted(arr):\n    seen = set()\n    result = []\n    for num in arr + [0]:\n        if num + 1 not in seen:\n            seen.add(num - 1)\n            result.append(num + 1)\n    return result[:-1]",
+                    "code": "def remove_duplicates_unsorted(arr):\n    seen = set()\n    result = []\n    for num in arr:\n        if num not in seen:\n            seen.add(num)\n            result.append(num + 1)  # BUG: Modifies values\n    return result",
                     "test_case": "remove_duplicates_unsorted([1, 2, 1, 3, 2, 4])",
                     "expected_output": "[1, 2, 3, 4]",
                     "hidden_cases": [
-                        {
-                            "test_case": "remove_duplicates_unsorted([])",
-                            "expected_output": "[]"
-                        },
-                        {
-                            "test_case": "remove_duplicates_unsorted([5,5,5])",
-                            "expected_output": "[5]"
-                        },
-                        {
-                            "test_case": "remove_duplicates_unsorted([1,2,3,4,5])",
-                            "expected_output": "[1, 2, 3, 4, 5]"
-                        }
+                        {"test_case": "remove_duplicates_unsorted([])", "expected_output": "[]"},
+                        {"test_case": "remove_duplicates_unsorted([5,5,5])", "expected_output": "[5]"},
+                        {"test_case": "remove_duplicates_unsorted([0,1,0])", "expected_output": "[0,1]"}
                     ]
                 },
                 "bug_24": {
-                    "code": "def reverse_string(s):\n    return s[:len(s)//2 + 1][::-1] + s[len(s)//2 - 1:]",
+                    "code": "def reverse_string(s):\n    return s[len(s)//2:] + s[:len(s)//2]  # BUG: Swaps halves instead of reversing",
                     "test_case": "reverse_string('hello')",
                     "expected_output": "'olleh'",
                     "hidden_cases": [
-                        {
-                            "test_case": "reverse_string('')",
-                            "expected_output": "''"
-                        },
-                        {
-                            "test_case": "reverse_string('a')",
-                            "expected_output": "'a'"
-                        },
-                        {
-                            "test_case": "reverse_string('racecar')",
-                            "expected_output": "'racecar'"
-                        }
+                        {"test_case": "reverse_string('')", "expected_output": "''"},
+                        {"test_case": "reverse_string('a')", "expected_output": "'a'"},
+                        {"test_case": "reverse_string('python')", "expected_output": "'nohtyp'"}
                     ]
                 },
                 "bug_25": {
-                    "code": "def array_intersection(arr1, arr2):\n    return [x for x in arr1 + [0] if x - 1 in arr2 + [0]]",
+                    "code": "def array_intersection(arr1, arr2):\n    return [x for x in arr1 if x in arr2 and x % 2 == 0]  # BUG: Only returns even numbers",
                     "test_case": "array_intersection([1, 2, 3, 4, 5], [3, 4, 5, 6, 7])",
                     "expected_output": "[3, 4, 5]",
                     "hidden_cases": [
-                        {
-                            "test_case": "array_intersection([], [1,2,3])",
-                            "expected_output": "[]"
-                        },
-                        {
-                            "test_case": "array_intersection([1,1,1], [1])",
-                            "expected_output": "[1, 1, 1]"
-                        },
-                        {
-                            "test_case": "array_intersection([1,2,3], [4,5,6])",
-                            "expected_output": "[]"
-                        }
+                        {"test_case": "array_intersection([], [1,2,3])", "expected_output": "[]"},
+                        {"test_case": "array_intersection([1,3,5], [2,4,6])", "expected_output": "[]"},
+                        {"test_case": "array_intersection([2,2], [2,2])", "expected_output": "[2,2]"}
                     ]
                 }
-            },
-            
+            },          
+                        
                 c: {
                     
                         "bug_1": {
@@ -1080,23 +858,61 @@ async function validatePython(userCode, bugData) {
             throw new Error("Direct return of expected output is not allowed");
         }
 
-        // Run the user's code
+        // Run the user's code to define functions
         await pyodide.runPythonAsync(userCode);
         
-        // Test with visible test case
-        let result = pyodide.runPython(bugData.test_case);
-        let expected = pyodide.runPython(bugData.expected_output);
+        let result, expected;
         
-        if (JSON.stringify(result) !== JSON.stringify(expected)) {
-            throw new Error(`Test case failed. Expected ${bugData.expected_output}, got ${result}`);
+        // Handle test cases that use print()
+        if (bugData.test_case.startsWith('print(')) {
+            await pyodide.runPythonAsync(`
+                import sys
+                from io import StringIO
+                captured_output = StringIO()
+                sys.stdout = captured_output
+            `);
+            
+            await pyodide.runPythonAsync(bugData.test_case);
+            result = pyodide.runPython("captured_output.getvalue().strip()");
+            expected = pyodide.runPython(`str(${bugData.expected_output})`);
+            
+            await pyodide.runPythonAsync("sys.stdout = sys.__stdout__");
+        } else {
+            // Direct function call case
+            result = await pyodide.runPythonAsync(bugData.test_case);
+            expected = await pyodide.runPythonAsync(bugData.expected_output);
+        }
+        
+        if (result === undefined) {
+            throw new Error(`Test case failed. Function returned nothing when expected ${expected}`);
+        }
+        
+        // Compare string representations
+        if (String(result).trim() !== String(expected).trim()) {
+            throw new Error(`Test case failed. Expected ${expected}, got ${result}`);
         }
 
-        // Test with hidden cases
+        // Handle hidden cases
         for (const hiddenCase of bugData.hidden_cases) {
-            result = pyodide.runPython(hiddenCase.test_case);
-            expected = pyodide.runPython(hiddenCase.expected_output);
+            if (hiddenCase.test_case.startsWith('print(')) {
+                await pyodide.runPythonAsync(`
+                    captured_output = StringIO()
+                    sys.stdout = captured_output
+                `);
+                await pyodide.runPythonAsync(hiddenCase.test_case);
+                result = pyodide.runPython("captured_output.getvalue().strip()");
+                expected = pyodide.runPython(`str(${hiddenCase.expected_output})`);
+                await pyodide.runPythonAsync("sys.stdout = sys.__stdout__");
+            } else {
+                result = await pyodide.runPythonAsync(hiddenCase.test_case);
+                expected = await pyodide.runPythonAsync(hiddenCase.expected_output);
+            }
             
-            if (JSON.stringify(result) !== JSON.stringify(expected)) {
+            if (result === undefined) {
+                throw new Error(`Hidden test case failed. Function returned nothing when expected ${expected}`);
+            }
+            
+            if (String(result).trim() !== String(expected).trim()) {
                 throw new Error(`Hidden test case failed for input ${hiddenCase.test_case}`);
             }
         }
