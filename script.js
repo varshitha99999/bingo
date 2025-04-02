@@ -23,14 +23,16 @@ const bug_data = {
                             {"test_case": "compress_string('')", "expected_output": "''"}
                         ]
                     },
-                    "bug_3": {
-                        "code": "def find_mode(arr):\n    if not arr:\n        return None\n    freq = {}\n    max_count = 0\n    modes = []\n    for i in range(1, len(arr)):\n        if arr[i] == arr[i-1]:\n            current_count = current_count + 1 if 'current_count' in locals() else 2\n        else:\n            current_count = 1\n        if current_count > max_count:\n            max_count = current_count\n            modes = [arr[i]]\n        elif current_count == max_count:\n            modes.append(arr[i])\n    return modes[0] if len(modes) == 1 else modes",
-                        "test_case": "find_mode([1,2,2,3,3,3,4])",
-                        "expected_output": "3",
-                        "hidden_cases": [
-                            {"test_case": "find_mode([])", "expected_output": "None"}
-                        ]
-                    },
+"bug_3": {
+    "code": "def is_rotation(s1, s2):\n    if len(s1) != len(s2):\n        return False\n    for i in range(len(s1)):\n        if s1 == s2[i:] + s2[:i+1]:\n            return True\n    return False",
+    "test_case": "is_rotation('waterbottle', 'erbottlewat')",
+    "expected_output": "True",
+    "hidden_cases": [
+        {"test_case": "is_rotation('abcd', 'dabc')", "expected_output": "True"},
+        {"test_case": "is_rotation('hello', 'olleh')", "expected_output": "False"},
+        {"test_case": "is_rotation('', '')", "expected_output": "True"}
+    ]
+},
                     "bug_4": {
                         "code": "def submatrix_sum(matrix, i1, j1, i2, j2):\n    total = 0\n    for i in range(i1, i2):\n        for j in range(j1, j2+1):\n            total += matrix[i][j]\n    return total",
                         "test_case": "submatrix_sum([[1,2,3],[4,5,6],[7,8,9]], 0, 0, 1, 1)",
@@ -138,15 +140,18 @@ const bug_data = {
                             {"test_case": "is_power_of_two(1)", "expected_output": "True"}
                         ]
                     },
-                    "bug_15": {
-                        "code": "def first_non_repeating_char(s):\n    count = {}\n    for ch in s:\n        count[ch] = count.get(ch, 0) + 1\n    for ch in s[1:]:\n        if count[ch] == 1:\n            return ch\n    return None",
-                        "test_case": "first_non_repeating_char('swiss')",
-                        "expected_output": "'w'",
-                        "hidden_cases": [
-                            {"test_case": "first_non_repeating_char('aabbcc')", "expected_output": "None"},
-                            {"test_case": "first_non_repeating_char('leetcode')", "expected_output": "'l'"}
-                        ]
-                    },
+"bug_15": {
+
+    "code": "def update_values(d, key, value):\n    if key in d:\n        d[key] = value\n    return value",
+    "test_case": "update_values({'a': 1, 'b': 2}, 'a', 3)",
+    "expected_output": "{'a': 3, 'b': 2}",
+    "hidden_cases": [
+        {"test_case": "update_values({}, 'x', 5)", "expected_output": "{}"},
+        {"test_case": "update_values({'x': 0}, 'x', -1)", "expected_output": "{'x': -1}"},
+        {"test_case": "update_values({'k': 'v'}, 'k', 'new')", "expected_output": "{'k': 'new'}"}
+    ]
+
+},
                     "bug_16": {
                         "code": "def find_second_largest(arr):\n    if len(arr) < 2:\n        return -1\n    first = second = arr[0]\n    for num in arr:\n        if num > first:\n            second = first\n            first = num\n        elif num > second and num != first:\n            second = num\n    return second if second != first else -1",
                         "test_case": "find_second_largest([10, 20, 5, 8, 30, 25])",
