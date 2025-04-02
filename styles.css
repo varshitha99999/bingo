@@ -379,3 +379,284 @@ body {
     50% { transform: scale(1.2); opacity: 1; }
     100% { transform: scale(1); opacity: 1; }
 }
+.win-celebration {
+    /* Your existing styles */
+    display: none;
+    /* Add these */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.win-celebration.active {
+    display: flex;
+}
+
+.final-stats {
+    margin: 20px 0;
+    width: 100%;
+    max-width: 300px;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.stat-label {
+    font-weight: bold;
+}
+
+.stat-value {
+    color: #fff;
+}
+/* Win Celebration Styles */
+.win-celebration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    color: white;
+    text-align: center;
+    overflow: hidden;
+}
+
+.win-celebration.active {
+    display: flex;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.win-content {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 3rem;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transform: scale(0.9);
+    animation: scaleIn 0.5s 0.3s ease-out forwards;
+}
+
+.trophy-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    animation: bounce 2s infinite;
+    text-shadow: 0 0 20px gold;
+}
+
+.win-title {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(to right, gold, #f5f7fa, gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine 3s infinite;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.win-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #f5f7fa;
+}
+
+.final-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.stat:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.stat-icon {
+    font-size: 1.8rem;
+    margin-right: 1rem;
+}
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 0.3rem;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+}
+
+.celebration-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-celebrate {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 24px;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-celebrate:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+}
+
+/* Confetti animation */
+.confetti-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #f00;
+    opacity: 0;
+    animation: confettiFall 5s linear infinite;
+}
+
+.confetti:nth-child(1) {
+    left: 10%;
+    background-color: #f00;
+    animation-delay: 0s;
+}
+
+.confetti:nth-child(2) {
+    left: 20%;
+    background-color: #0f0;
+    animation-delay: 0.5s;
+}
+
+.confetti:nth-child(3) {
+    left: 30%;
+    background-color: #00f;
+    animation-delay: 1s;
+}
+
+.confetti:nth-child(4) {
+    left: 40%;
+    background-color: #ff0;
+    animation-delay: 1.5s;
+}
+
+.confetti:nth-child(5) {
+    left: 50%;
+    background-color: #f0f;
+    animation-delay: 2s;
+}
+
+.confetti:nth-child(6) {
+    left: 60%;
+    background-color: #0ff;
+    animation-delay: 2.5s;
+}
+
+.confetti:nth-child(7) {
+    left: 70%;
+    background-color: #f00;
+    animation-delay: 3s;
+}
+
+.confetti:nth-child(8) {
+    left: 80%;
+    background-color: #0f0;
+    animation-delay: 3.5s;
+}
+
+.confetti:nth-child(9) {
+    left: 90%;
+    background-color: #00f;
+    animation-delay: 4s;
+}
+
+.confetti:nth-child(10) {
+    left: 100%;
+    background-color: #ff0;
+    animation-delay: 4.5s;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); }
+    to { transform: scale(1); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes shine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
