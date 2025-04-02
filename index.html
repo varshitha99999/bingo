@@ -137,12 +137,62 @@
         </div>
 
         <!-- Win Celebration Modal -->
-        <div class="win-celebration" id="winCelebration">
-            <div class="win-text">CONGRATULATIONS!</div>
-            <div class="win-subtext">You've fixed all the bugs and won Bug Bingo!</div>
-            <button class="btn btn-light mt-4" onclick="document.getElementById('winCelebration').classList.remove('active')">Continue Playing</button>
+       <!-- Win Celebration Modal -->
+<!-- Win Celebration Modal -->
+<div class="win-celebration" id="winCelebration">
+    <div class="confetti-container">
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+    </div>
+    <div class="win-content">
+        <div class="trophy-icon">🏆</div>
+        <h2 class="win-title">CONGRATULATIONS!</h2>
+        <p class="win-subtitle">You've completed Bug Bingo!</p>
+        
+        <div class="final-stats">
+            <div class="stat">
+                <span class="stat-icon">⏱️</span>
+                <div class="stat-details">
+                    <span class="stat-label">Time</span>
+                    <span id="finalTime" class="stat-value">00:00</span>
+                </div>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">⭐</span>
+                <div class="stat-details">
+                    <span class="stat-label">Score</span>
+                    <span id="finalScore" class="stat-value">0</span>
+                </div>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">🎯</span>
+                <div class="stat-details">
+                    <span class="stat-label">Focus</span>
+                    <span id="finalFocus" class="stat-value">100%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="celebration-buttons">
+            <button class="btn btn-celebrate" onclick="exitGame()">
+                <span>Exit Game</span>
+                <span class="btn-icon">🚪</span>
+            </button>
+            <button class="btn btn-celebrate" onclick="resetGame()">
+                <span>Play Again</span>
+                <span class="btn-icon">🔄</span>
+            </button>
         </div>
     </div>
+</div>
 
     <!-- Loading Indicator -->
     <div id="loadingIndicator" class="loading-indicator">
